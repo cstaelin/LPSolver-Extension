@@ -1,8 +1,3 @@
-## Linear Programming Extension
-
-This extension provides an interface to the open source Linear Program solver lpsolve (available freely via Sourceforge), allowing integration of linear programming functionality to NetLogo models.
-
-
 ### INSTALLATION INSTRUCTIONS for LPSolver v3.0.0:
 
 This version of the `lpsolver` extension is compatible with NetLogo 6.1, and requires multiple library files in order to function. Installation instructions for Windows and Linux are given below. Instructuions for the Macintosh are still being developed.
@@ -21,7 +16,7 @@ The best way to install the extensions is through the NetLogo Extension Manager 
     `extensions [lpsolver]` <br/> 
 at the beginning of your NetLogo model, or add `lpsolver` to the extensions already listed. When you press the "Check" button, the Extension Manager will say that the `lpsolver` extension is not installed and will ask if you would like NetLogo to downloard it for you. Choose "Yes" and NetLogo will download and install the extension and the necessary libraries in the hidden directory 
 `.netlogo/6.1/extensions/lpsolver`
-under your home directory. (In order to look at this directory, you may need to ask the file manager, e.g., Nautilaus in Ubuntu, to show system files.) In that directory you will see the file liblpsolve55.so. This file must be copied to `/usr/lib`. There is a shell file, Copy_liblpsolve55.sh that shows how this can be done, and will do if for you if executed in the Terminal. You will need administrator priviledges.
+under your home directory. (In order to look at this directory, you may need to ask the file manager, e.g., Nautilaus in Ubuntu, to show system files.) In that directory you will see the file liblpsolve55.so. This file must be copied to `/usr/lib`. There is a shell file, Copy_liblpsolve55.sh that shows how this can be done, and will do if for you if executed in the Terminal. You will need administrator privileges.
 
 **Additional Information**
 

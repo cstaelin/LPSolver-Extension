@@ -49,7 +49,16 @@ public class LPSolverExtension extends org.nlogo.api.DefaultClassManager {
             if (operatingSystem.startsWith("MAC")) {
                 // don't yet know what to do here.
             } else {
-                // we assume Linux.  
+                /** we assume Linux. Ideally we would like to alter 
+                 * LD_LIBRARY_PATH to point to the directory where the 
+                 * extension is installed. However, Ubuntu (at least) does 
+                 * not allow the user to set this environment variable in 
+                * any way that persists, so we are reduced to copying the 
+                * liblpsolve55.so shared library to where Linux will look 
+                * without being told.  /usr/lib is one such place. It would 
+                * be nice if we could do the copy here, but doing so requires
+                * administrator privileges.
+                */
                 // See if liblpsolve55.so is where it needs to be.
                 File soLib = new File("/usr/lib/liblpsolve55.so");
                 if (!soLib.exists()) {
