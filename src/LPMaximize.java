@@ -55,7 +55,7 @@ public class LPMaximize implements Reporter {
             LogoList LogListLPparams = args[1].getList();
             LogoList LogListObjFn = args[2].getList();
             LogoList LogListIntFn = args[3].getList();
-            Iterator it = LogListLPparams.javaIterator();
+            Iterator<?> it = LogListLPparams.javaIterator();
 
             /* Move through each sub-list of the passed list
 		Individual lists should spell out a particular parameter of the desired LP

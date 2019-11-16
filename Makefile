@@ -29,10 +29,10 @@ JAVAC := "$(JAVA_HOME)/bin/javac"
 JAVAJAR := "$(JAVA_HOME)/bin/jar"
 SRCS := $(wildcard src/*.java)
 
-lpsolverExtension.zip: lpsolver.jar lpsolve55j.jar lpsolve55j.dll lpsolve55.dll lpsolve55j.so lpsolve55.so README.md license.md Makefile src manifest.txt Examples
+lpsolverExtension.zip: lpsolver.jar lpsolve55j.jar lpsolve55j.dll lpsolve55.dll liblpsolve55j.so liblpsolve55.so README.md Makefile src manifest.txt Examples
 	rm -rf lpsolver
 	mkdir lpsolver
-	cp -rp lpsolver.jar lpsolve55j.jar lpsolve55j.dll lpsolve55.dll lpsolve55j.so lpsolve55.so README.md license.md Makefile src manifest.txt Examples lpsolver
+	cp -rp lpsolver.jar lpsolve55j.jar lpsolve55j.dll lpsolve55.dll liblpsolve55j.so liblpsolve55.so README.md Makefile src manifest.txt Examples lpsolver
 	zip -rv lpsolverExtension.zip lpsolver
 	rm -rf lpsolver
 
