@@ -24,12 +24,13 @@ endif
 # handle cases where there are blanks in file/directory names, as is 
 # common in Windows.
 NETLOGO_JAR := "$(shell find "$(NETLOGO)"/app -name netlogo-*.jar)"
+SCALA_JAR := "$(shell find "$(NETLOGO)"/app -name scala-library-*.jar)"
 #NETLOGO_JAR := $(wildcard $(NETLOGO)/app/netlogo-*.jar)
 JAVAC := "$(JAVA_HOME)/bin/javac"
 JAVAJAR := "$(JAVA_HOME)/bin/jar"
 SRCS := $(wildcard src/*.java)
 
-lpsolverExtension.zip: lpsolver.jar lpsolve55j.jar lpsolve55j.dll lpsolve55.dll liblpsolve55j.so liblpsolve55.so README.md Makefile src manifest.txt Examples
+lpsolverExtension.zip: lpsolver.jar lpsolve55j.jar lpsolve55j.dll lpsolve55.dll liblpsolve55j.so liblpsolve55.so README.md Makefile src manifest.txt Copy_liblpsolve55.sh Examples
 	rm -rf lpsolver
 	mkdir lpsolver
 	cp -rp lpsolver.jar lpsolve55j.jar lpsolve55j.dll lpsolve55.dll liblpsolve55j.so liblpsolve55.so README.md Makefile src manifest.txt Examples lpsolver
@@ -39,7 +40,7 @@ lpsolverExtension.zip: lpsolver.jar lpsolve55j.jar lpsolve55j.dll lpsolve55.dll 
 lpsolver.jar: $(SRCS) lpsolve55j.jar Makefile manifest.txt
 	rm -rf classes
 	mkdir -p classes
-	$(JAVAC) -g -deprecation -Xlint:all -Xlint:-serial -Xlint:-path -encoding us-ascii -source 1.8 -target 1.8 -classpath $(NETLOGO_JAR)$(COLON)lpsolve55j.jar -d classes $(SRCS)
+	$(JAVAC) -g -deprecation -Xlint:all -Xlint:-serial -Xlint:-path -encoding us-ascii -source 1.8 -target 1.8 -classpath $(NETLOGO_JAR)$(COLON)$(SCALA_JAR)$(COLON)lpsolve55j.jar -d classes $(SRCS)
 	$(JAVAJAR) cmf manifest.txt lpsolver.jar -C classes .
 	rm -rf classes
 
