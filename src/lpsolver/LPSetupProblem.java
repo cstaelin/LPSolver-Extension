@@ -2,8 +2,8 @@
  * this class instantiates and solves a maximization problem passed by the user
  *
  * @author AFMac
- * @version 3.0.0
- * Updated for NetLogo v6.1 by Charles Staelin
+ * @version 4.1.0
+ * Updated for NetLogo v7.0 by Charles Staelin - September 2025
  */
 package org.nlogo.extensions.lpsolver;
 
@@ -19,10 +19,19 @@ import org.nlogo.core.SyntaxJ;
 import org.nlogo.core.LogoList;
 import java.util.Iterator;
 
-public class LPMaximize implements Reporter {
+public class LPSetupProblem implements Reporter {
+    
+    public static int MAXIMIZE = 0;
+    public static int MINIMIZE = 1;
+    private int solutionType = MAXIMIZE;
+    
+    // This consructor determines the type of problem being passed
+    public LPSetupProblem(int slnType) {
+        solutionType = slnType;
+    }
 
     @Override
-    public Syntax getSyntax() {
+    public Syntax getSyntax() { 
         int[] right = new int[]{Syntax.NumberType(),
             Syntax.ListType(), Syntax.ListType(), Syntax.ListType()};
         int ret = Syntax.ListType();
@@ -31,27 +40,20 @@ public class LPMaximize implements Reporter {
 
     @Override
     public Object report(Argument args[], Context context)
-            throws ExtensionException {
-        
-//        String newLibraryPath = System.getProperty("java.library.path");
-//        LPSolverExtension.writeToNetLogo(newLibraryPath, false, context);
-//        LPSolverExtension.writeToNetLogo(System.getProperty("os.name").toLowerCase(), false, context);
-//        LPSolverExtension.writeToNetLogo(System.getProperty("os.arch").toLowerCase(), false, context);
-//        LPSolverExtension.writeToNetLogo(System.getProperty("PATH"), false, context);
-//        LPSolverExtension.writeToNetLogo(System.getenv("PATH"), false, context);
+            throws ExtensionException {   
         
         try {
             //specify vars for the passed parameters
-            int numVars = 0;
-            int i = 0;
             LogoListBuilder objfn = new LogoListBuilder();
             LogoListBuilder LPparams = new LogoListBuilder();
             LogoListBuilder intfn = new LogoListBuilder();
-            String con = "";
-            String obj = "";
-            double y = 0;
-            double varVals = 0;
-            numVars = args[0].getIntValue();
+            LogoListBuilder rtnSolnList = new LogoListBuilder();
+            LogoListBuilder rtnShadList = new LogoListBuilder();
+            LogoListBuilder rtnFinalList = new LogoListBuilder();
+            int i;
+            double y;
+            
+            int numVars = args[0].getIntValue();
             LPparams.add(args[1].get());
             objfn.add(args[2].get());
             intfn.add(args[3].get());
@@ -60,26 +62,30 @@ public class LPMaximize implements Reporter {
             LogoList LogListObjFn = args[2].getList();
             LogoList LogListIntFn = args[3].getList();
             Iterator<?> it = LogListLPparams.javaIterator();
-
+          
             /* Move through each sub-list of the passed list
-		Individual lists should spell out a particular parameter of the desired LP
-		[ [obj func] [constraint 1] [contstraint 2] [...] ]
+             * Individual lists should spell out a particular parameter 
+             * of the desired LP 
+             * [ [obj func] [constraint 1] [contstraint 2] [...] ]
              */
+            
             //generate the LP with number of variables passed by user
             LpSolve solver = LpSolve.makeLp(0, numVars);
 
-            LogoListBuilder rtnList = new LogoListBuilder();
-            while (it.hasNext()) {
+            while (it.hasNext()) {  
                 LogoList intList = (LogoList) it.next();
-                con = "";
-                for (i = 1; i <= numVars; i++) {
+                String con = "";
+                for (i = 1; i <= numVars; i++) {						 
                     y = ((Double) intList.get(i - 1));
                     con += " " + y;
                 }
 
-                solver.strAddConstraint(con, ((Double) intList.get(i - 1)).intValue(), ((Double) intList.get(i)));
+                solver.strAddConstraint(con, 
+                        ((Double) intList.get(i - 1)).intValue(), 
+                        ((Double) intList.get(i)));
             }
             //add in objective function
+            String obj = "";
             for (i = 1; i <= LogListObjFn.size(); i++) {
                 y = ((Double) LogListObjFn.get(i - 1));
                 obj += " " + y;
@@ -87,10 +93,12 @@ public class LPMaximize implements Reporter {
             solver.strSetObjFn(obj);
 
             //opportunity to set variables as integer
+            boolean anyInts = false;
             for (i = 1; i <= LogListIntFn.size(); i++) {
                 y = ((Double) LogListIntFn.get(i - 1));
                 if (y == 1) {
                     solver.setInt(i, true);
+                    anyInts = true;
                 } else if (y == 2) {
                     solver.setBinary(i, true);
                 } else {
@@ -98,34 +106,50 @@ public class LPMaximize implements Reporter {
                 }
             }
 
-            // reduce verbosity, set as max
+            // reduce verbosity, and set the type of problem
             solver.setVerbose(3);
-            solver.setMaxim();
-
-            // solve the problem
-            solver.solve();
-
-            //get solution info
-            double[] var = solver.getPtrVariables();
-
-            for (i = 0; i < var.length; i++) {
-                rtnList.add(var[i]);
+            if (solutionType == MAXIMIZE) {
+                solver.setMaxim();
+            } else {
+                solver.setMinim();
             }
 
+            // If there are integer variables, call preSolve.
+            if (anyInts) {
+                solver.setPresolve(
+                        LpSolve.PRESOLVE_REDUCEGCD | LpSolve.PRESOLVE_SENSDUALS, 
+                        solver.getPresolveloops());
+            }
+            // solve the problem getting the solution  and the shadow prices.
+            solver.solve();
+            double[] var = solver.getPtrVariables();
             y = solver.getObjective();
+            int cntr = solver.getNorigRows() + numVars;
+            double [][] sens = new double [cntr][cntr];
+            sens = solver.getPtrSensitivityRhs();
             solver.deleteLp();
-
-            LogoList finalRtnList = rtnList.toLogoList();
-            finalRtnList = finalRtnList.fput(y);
-
-            return finalRtnList;
+            
+            // Now report the results as a list of llists
+            // First the solution.
+            for (i = 0; i < var.length; i++) {
+                rtnSolnList.add(var[i]);
+            }
+            LogoList solutionList = rtnSolnList.toLogoList();
+            // Then the shadow prices.
+            for (i = 0; i < (cntr - numVars); i++) {
+                rtnShadList.add(sens[0][i]);
+            }
+            LogoList shadowList = rtnShadList.toLogoList();
+            rtnFinalList.add(y);
+            rtnFinalList.add(solutionList);
+            rtnFinalList.add(shadowList);
+            
+            return rtnFinalList.toLogoList();
 
         } catch (LogoException e) {
             throw new ExtensionException(e.getMessage());
         } catch (LpSolveException e) {
             throw new ExtensionException(e.toString());
         }
-
     }
-
 }
