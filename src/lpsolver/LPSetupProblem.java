@@ -2,7 +2,7 @@
  * this class instantiates and solves a maximization problem passed by the user
  *
  * @author AFMac
- * @version 4.1.0
+ * @version 4.2.0
  * Updated for NetLogo v7.0 by Charles Staelin - September 2025
  */
 package org.nlogo.extensions.lpsolver;
@@ -24,6 +24,7 @@ public class LPSetupProblem implements Reporter {
     public static int MAXIMIZE = 0;
     public static int MINIMIZE = 1;
     private int solutionType = MAXIMIZE;
+    public static Context ctx;
     
     // This consructor determines the type of problem being passed
     public LPSetupProblem(int slnType) {
@@ -41,7 +42,12 @@ public class LPSetupProblem implements Reporter {
     @Override
     public Object report(Argument args[], Context context)
             throws ExtensionException {   
-        
+    
+        // This variable allows us to get the context in the other methods
+        // without their needing to have it in their arguments.  This is 
+        // useful for debugging.
+        ctx = context;
+
         try {
             //specify vars for the passed parameters
             LogoListBuilder objfn = new LogoListBuilder();

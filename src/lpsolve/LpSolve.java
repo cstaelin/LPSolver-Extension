@@ -15,13 +15,20 @@
 
 	You should have received a copy of the GNU Lesser General Public
 	License along with this library; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+        Updated for use by version 4.2.0 of the lpsolver extension of 
+        NetLogo 7.0 by Charles Staelin, September 2025.
 */
 
 package lpsolve;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+// import java.util.logging.Level;
+// import java.util.logging.Logger;
+import org.nlogo.api.ExtensionException;
 
 
 /**
@@ -268,14 +275,21 @@ public class LpSolve {
 	 */
 	private Object bbNodeUserhandle = null;
 
-	/**
-	 * Static initializer to load the stub library
-	 */
 	static {
-//		System.loadLibrary("lpsolve55j");
-                org.nlogo.extensions.lpsolver.LPLibraryLoader.loadit();
-		init();
-	}
+        // Static initializer to load the stub library. Modified to use and 
+        // catch possible exceptions from LPLibraryLoader.loadit(). 
+        // (cps 09/2025)
+        try {
+            org.nlogo.extensions.lpsolver.LPLibraryLoader.loadit();
+            init();
+            } catch (IOException | ExtensionException ex) {
+                try {
+                    throw new ExtensionException("Failed to load the " 
+                    + "lpsolve55 native libraries. Please report this error.");
+                } catch (ExtensionException ex1) {
+                }
+            }
+        }
 
 	/**
 	 * Native helper method to cache method and field IDs.
@@ -305,30 +319,51 @@ public class LpSolve {
 	 *
 	 * @param rows Initial number of rows.
 	 * @param columns Initial number of columns.
+         * @return 
 	 * @throws LpSolveException if lp_solve could not create the problem
 	 */
 	public static native LpSolve makeLp(int rows, int columns) throws LpSolveException;
 
 	/**
 	 * Read an lp model from file and create a new problem.
+     * @param filename
+     * @param verbose
+     * @param lpName
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public static native LpSolve readLp(String filename, int verbose, String lpName)
 		throws LpSolveException;
 
 	/**
 	 * Read an mps model from file and create a new problem.
+     * @param filename
+     * @param verbose
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public static native LpSolve readMps(String filename, int verbose)
 		throws LpSolveException;
 
 	/**
 	 * Read a model in free MPS format from file and create a new problem.
+     * @param filename
+     * @param verbose
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public static native LpSolve readFreeMps(String filename, int verbose)
 		throws LpSolveException;
 
 	/**
 	 * Read a model via the External Language Interface and create a new problem.
+     * @param xliname
+     * @param modelname
+     * @param dataname
+     * @param options
+     * @param verbose
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public static native LpSolve readXLI(String xliname, String modelname,
 			String dataname, String options, int verbose) throws LpSolveException;
@@ -383,146 +418,235 @@ public class LpSolve {
 	/**
 	 * Copy an existing lprec structure to a new lprec structure.
 	 * Creates an independent new problem.
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native LpSolve copyLp() throws LpSolveException;
 
 	/**
 	 * Set the name of the problem.
+     * @param name
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setLpName(String name) throws LpSolveException;
 
 	/**
 	 * Allocate memory for the specified size.
+     * @param rows
+     * @param columns
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void resizeLp(int rows, int columns) throws LpSolveException;
 
 	/**
 	 * Get the name of the problem.
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native String getLpName() throws LpSolveException;
 
 	/**
 	 * Add a constraint to the problem.
+     * @param row
+     * @param constrType
+     * @param rh
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void addConstraint(double[] row, int constrType, double rh) throws LpSolveException;
 
 	/**
 	 * Add a constraint to the problem.
+     * @param row
+     * @param constrType
+     * @param rh
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void strAddConstraint(String row, int constrType, double rh) throws LpSolveException;
 
 	/**
 	 * Add a constraint to the problem.
+     * @param count
+     * @param rh
+     * @param row
+     * @param constrType
+     * @param colno
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void addConstraintex(int count, double[] row, int[] colno, int constrType, double rh) throws LpSolveException;
 
 	/**
 	 * Remove a constraint from the problem.
+     * @param rownr
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void delConstraint(int rownr) throws LpSolveException;
 
 	/**
 	 * Returns if constraint type specified in mask is active.
+     * @param row
+     * @param mask
+     * @return 
 	 */
 	public native boolean isConstrType(int row, int mask);
 
 	/**
 	 * Add a Lagrangian constraint to the problem.
+     * @param row
+     * @param constrType
+     * @param rh
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void addLagCon(double[] row, int constrType, double rh) throws LpSolveException;
 
 	/**
 	 * Add a Lagrangian constraint to the problem.
+     * @param row
+     * @param constrType
+     * @param rh
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void strAddLagCon(String row, int constrType, double rh) throws LpSolveException;
 
 	/**
 	 * Add a column to the problem.
+     * @param column
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void addColumn(double[] column) throws LpSolveException;
 
 	/**
 	 * Add a column to the problem.
+     * @param count
+     * @param column
+     * @param rowno
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void addColumnex(int count, double[] column, int[] rowno) throws LpSolveException;
 
 	/**
 	 * Add a column to the problem.
+     * @param column
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void strAddColumn(String column) throws LpSolveException;
 
 	/**
 	 * Remove a column from the problem.
+     * @param columnnr
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void delColumn(int columnnr) throws LpSolveException;
 
 	/**
 	 * Set a constraint in the lp.
+     * @param rowno
+     * @param row
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setRow(int rowno, double[] row) throws LpSolveException;
 
 	/**
 	 * Set a constraint in the lp.
+     * @param rowno
+     * @param count
+     * @param row
+     * @param colno
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setRowex(int rowno, int count, double[] row, int[] colno) throws LpSolveException;
 
 	/**
 	 * Set a column in the lp.
+     * @param colno
+     * @param column
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setColumn(int colno, double[] column) throws LpSolveException;
 
 	/**
 	 * Set a column in the lp.
+     * @param colno
+     * @param rowno
+     * @param count
+     * @param column
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setColumnex(int colno, int count, double[] column, int[] rowno) throws LpSolveException;
 
 	/**
 	 * Check if a column is already present in the problem.
+     * @param column
+     * @return 
 	 */
 	public native int columnInLp(double[] column);
 
 	/**
 	 * Set the name of a constraint (row) in the problem.
+     * @param rownr
+     * @param name
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setRowName(int rownr, String name) throws LpSolveException;
 
 	/**
 	 * Gets the name of a constraint (row) in the problem.
+     * @param rownr
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native String getRowName(int rownr) throws LpSolveException;
 
 	/**
 	 * Gets the name of a constraint (row) in the problem.
+     * @param rownr
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native String getOrigrowName(int rownr) throws LpSolveException;
 
 	/**
 	 * Set the name of a column in the problem.
+     * @param colnr
+     * @param name
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setColName(int colnr, String name) throws LpSolveException;
 
 	/**
 	 * Gets the name of a column in the problem.
+     * @param colnr
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native String getColName(int colnr) throws LpSolveException;
 
 	/**
 	 * Gets the name of a column in the problem.
+     * @param colnr
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native String getOrigcolName(int colnr) throws LpSolveException;
 
 	/**
 	 * Set the right hand side (RHS) vector (column 0).
+     * @param rh
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setRhVec(double[] rh) throws LpSolveException;
 
 	/**
 	 * Set the right hand side (RHS) vector (column 0).
+     * @param rh
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void strSetRhVec(String rh) throws LpSolveException;
 
 	/**
 	 * Set the value of the right hand side (RHS) vector (column 0) for one row.
+     * @param row
+     * @param value
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setRh(int row, double value) throws LpSolveException;
 
@@ -530,69 +654,113 @@ public class LpSolve {
 	 * Get the value of the right hand side (RHS) vector (column 0) for one row.
 	 * NOTE: Returns 0 even if the row index is out of bounds, in accordance
 	 * to the behaviour of the lp_solve routine!
+     * @param row
+     * @return 
 	 */
 	public native double getRh(int row);
 
 	/**
 	 * Set the type of a constraint.
+     * @param rownr
+     * @param constrType
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setConstrType(int rownr, int constrType) throws LpSolveException;
 
 	/**
 	 * Get the type of a constraint.
+     * @param rownr
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native short getConstrType(int rownr) throws LpSolveException;
 
 	/**
 	 * Add a SOS constraint.
+     * @param name
+     * @param sostype
+     * @param priority
+     * @param count
+     * @param weights
+     * @param sosvars
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void addSOS(String name, int sostype, int priority, int count,
 		int[] sosvars, double[] weights) throws LpSolveException;
 
 	/**
 	 * Returns if the variable is SOS or not.
+     * @param colnr
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native boolean isSOSVar(int colnr) throws LpSolveException;
 
 	/**
 	 * Set the objective function (row 0) of the matrix.
+     * @param row
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setObjFn(double[] row) throws LpSolveException;
 
 	/**
 	 * Set the objective function (row 0) of the matrix.
+     * @param row
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void strSetObjFn(String row) throws LpSolveException;
 
 	/**
 	 * Set the objective function (row 0) of the matrix.
+     * @param count
+     * @param colno
+     * @param row
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setObjFnex(int count, double[] row, int[] colno) throws LpSolveException;
 
 	/**
 	 * Set the objective function (row 0) of the matrix.
+     * @param column
+     * @param value
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setObj(int column, double value) throws LpSolveException;
 
 	/**
 	 * Set a single element in the matrix.
+     * @param row
+     * @param column
+     * @param value
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setMat(int row, int column, double value) throws LpSolveException;
 
 	/**
 	 * Get a single element from the matrix.
+     * @param row
+     * @param column
+     * @return 
 	 */
 	public native double getMat(int row, int column);
 
 	/**
 	 * Get all row elements from the matrix.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param rownr
+     * @param row
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getRow(int rownr, double[] row) throws LpSolveException;
 
 	/**
 	 * Get the non-zero row elements from the matrix.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param rownr
+     * @param row
+     * @param nzcols
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native int getRowex(int rownr, double[] row, int[] nzcols) throws LpSolveException;
 
@@ -601,18 +769,29 @@ public class LpSolve {
 	 * Returned array is allocated by the method.
 	 * This is an additional method which is not implemented by lp_solve.
 	 * Internally, get_row is used.
+     * @param rownr
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native double[] getPtrRow(int rownr) throws LpSolveException;
 
 	/**
 	 * Get all column elements from the matrix.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param colnr
+     * @param column
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getColumn(int colnr, double[] column) throws LpSolveException;
 
 	/**
 	 * Get the non-zero column elements from the matrix.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param colnr
+     * @param column
+     * @param nzrows
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native int getColumnex(int colnr, double[] column, int[] nzrows) throws LpSolveException;
 
@@ -621,6 +800,9 @@ public class LpSolve {
 	 * Returned array is allocated by the method.
 	 * This is an additional method which is not implemented by lp_solve.
 	 * Internally, get_column is used.
+     * @param columnrnr
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native double[] getPtrColumn(int columnrnr) throws LpSolveException;
 
@@ -636,590 +818,758 @@ public class LpSolve {
 
 	/**
 	 * Set objective function sense.
+     * @param maximize
 	 */
 	public native void setSense(boolean maximize);
 
 	/**
 	 * Returns objective function direction.
+     * @return 
 	 */
 	public native boolean isMaxim();
 
 	/**
 	 * Set the lower bound of a variable.
+     * @param colnr
+     * @param value
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setLowbo(int colnr, double value) throws LpSolveException;
 
 	/**
 	 * Get the lower bound of a variable.
+     * @param colnr
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native double getLowbo(int colnr) throws LpSolveException;
 
 	/**
 	 * Set the upper bound of a variable.
+     * @param colnr
+     * @param value
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setUpbo(int colnr, double value) throws LpSolveException;
 
 	/**
 	 * Get the upper bound of a variable.
+     * @param colnr
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native double getUpbo(int colnr) throws LpSolveException;
 
 	/**
 	 * Sets if the variable is free.
+     * @param colnr
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setUnbounded(int colnr) throws LpSolveException;
 
 	/**
 	 * Returns if the variable is free.
+     * @param colnr
+     * @return 
 	 */
 	public native boolean isUnbounded(int colnr);
 
 	/**
 	 * Returns if the variable is negative.
+     * @param colnr
+     * @return 
 	 */
 	public native boolean isNegative(int colnr);
 
 	/**
 	 * Set the upper and lower bound of a variable.
+     * @param colnr
+     * @param lower
+     * @param upper
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setBounds(int colnr, double lower, double upper) throws LpSolveException;
 
 	/**
 	 * Specifies if set bounds may only be tighter or also less restrictive.
+     * @param tighten
 	 */
 	public native void setBoundsTighter(boolean tighten);
 
 	/**
 	 * Returns if set bounds may only be tighter or also less restrictive.
+     * @return 
 	 */
 	public native boolean getBoundsTighter();
 
 	/**
 	 * Set the range on a constraint.
+     * @param rownr
+     * @param range
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setRhRange(int rownr, double range) throws LpSolveException;
 
 	/**
 	 * Gets the range on a constraint.
+     * @param rownr
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native double getRhRange(int rownr) throws LpSolveException;
 
 	/**
 	 * Set the type of the variable. Integer or floating point.
+     * @param colnr
+     * @param mustBeInteger
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setInt(int colnr, boolean mustBeInteger) throws LpSolveException;
 
 	/**
 	 * Get the type of the variable. Integer or floating point.
+     * @param colnr
+     * @return 
 	 */
 	public native boolean isInt(int colnr);
 
 	/**
 	 * Set the type of the variable. Binary or floating point.
+     * @param colnr
+     * @param mustBeBin
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setBinary(int colnr, boolean mustBeBin) throws LpSolveException;
 
 	/**
 	 * Gets the type of the variable. Binary integer or floating point.
+     * @param colnr
+     * @return 
 	 */
 	public native boolean isBinary(int colnr);
 
 	/**
 	 * Set the type of the variable. semi-continious or not.
+     * @param colnr
+     * @param mustBeSc
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setSemicont(int colnr, boolean mustBeSc) throws LpSolveException;
 
 	/**
 	 * Get the type of the variable. semi-continious or not.
+     * @param colnr
+     * @return 
 	 */
 	public native boolean isSemicont(int colnr);
 
 	/**
 	 * Specifies the practical value for "infinite".
+     * @param value
 	 */
 	public native void setInfinite(double value);
 
 	/**
 	 * Returns the value of "infinite".
+     * @return 
 	 */
 	public native double getInfinite();
 
 	/**
 	 * Checks if the provided absolute of the value is larger or equal to "infinite".
+     * @param value
+     * @return 
 	 */
 	public native boolean isInfinite(double value);
 
 	/**
 	 * Specifies the tolerance that is used to determine whether a floating-point
 	 * number is in fact an integer.
+     * @param value
 	 */
 	public native void setEpsint(double value);
 
 	/**
 	 * Returns the tolerance that is used to determine whether a floating-point
 	 * number is in fact an integer
+     * @return 
 	 */
 	public native double getEpsint();
 
 	/**
 	 * Specifies the value that is used as a tolerance for the Right Hand Side (RHS)
 	 * to determine whether a value should be considered as 0
+     * @param value
 	 */
 	public native void setEpsb(double value);
 
 	/**
 	 * Returns the value that is used as a tolerance for the Right Hand Side (RHS)
 	 * to determine whether a value should be considered as 0.
+     * @return 
 	 */
 	public native double getEpsb();
 
 	/**
 	 * Specifies the value that is used as a tolerance for reduced costs
 	 * to determine whether a value should be considered as 0.
+     * @param value
 	 */
 	public native void setEpsd(double value);
 
 	/**
 	 * Returns the value that is used as a tolerance for the reduced costs
 	 * to determine whether a value should be considered as 0.
+     * @return 
 	 */
 	public native double getEpsd();
 
 	/**
 	 * Specifies the value that is used as a tolerance for rounding values to zero.
+     * @param value
 	 */
 	public native void setEpsel(double value);
 
 	/**
 	 * Returns the value that is used as a tolerance for rounding values to zero.
+     * @return 
 	 */
 	public native double getEpsel();
 
 	/**
 	 * Specifies the value that is used as a tolerance pivot element to determine
 	 * whether a value should be considered as 0.
+     * @param value
 	 */
 	public native void setEpspivot(double value);
 
 	/**
 	 * Returns the value that is used as a tolerance pivot element to determine
 	 * whether a value should be considered as 0.
+     * @return 
 	 */
 	public native double getEpspivot();
 
 	/**
 	 * Specifies the value that is used as perturbation scalar for degenerative problems.
+     * @param value
 	 */
 	public native void setEpsperturb(double value);
 
 	/**
 	 * Returns the value that is used as perturbation scalar for degenerative problems.
+     * @return 
 	 */
 	public native double getEpsperturb();
 
 	/**
 	 * This is a simplified way of specifying multiple eps thresholds that are "logically" consistent.
+     * @param epslevel
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setEpslevel(int epslevel) throws LpSolveException;
 
 	/**
 	 * Returns an extra status after a call to a function.
+     * @return 
 	 */
 	public native int getStatus();
 
 	/**
 	 * Specifies the MIP gap value.
+     * @param absolute
+     * @param value
 	 */
 	public native void setMipGap(boolean absolute, double value);
 
 	/**
 	 * Returns the MIP gap value.
+     * @param absolute
+     * @return 
 	 */
 	public native double getMipGap(boolean absolute);
 
 	/**
 	 * Set the verbose level.
+     * @param verbose
 	 */
 	public native void setVerbose(int verbose);
 
 	/**
 	 * Returns the verbose level.
+     * @return 
 	 */
 	public native int getVerbose();
 
 	/**
 	 * Set a timeout.
+     * @param timeout
 	 */
 	public native void setTimeout(long timeout);
 
 	/**
 	 * Gets the timout.
+     * @return 
 	 */
 	public native long getTimeout();
 
 	/**
 	 * Gets the time elapsed since start of solve.
+     * @return 
 	 */
 	public native double timeElapsed();
 
 	/**
 	 * Sets a flag if all intermediate valid solutions must be printed while solving.
+     * @param printSol
 	 */
 	public native void setPrintSol(int printSol);
 
 	/**
 	 * Returns a flag if all intermediate valid solutions must be printed while solving.
+     * @return 
 	 */
 	public native int getPrintSol();
 
 	/**
 	 * Sets a flag if all intermediate results and the branch-and-bound decisions
 	 * must be printed while solving.
+     * @param debug
 	 */
 	public native void setDebug(boolean debug);
 
 	/**
 	 * Returns a flag if all intermediate results and the branch-and-bound decisions
 	 * must be printed while solving.
+     * @return 
 	 */
 	public native boolean isDebug();
 
 	/**
 	 * Sets a flag if pivot selection must be printed while solving.
+     * @param trace
 	 */
 	public native void setTrace(boolean trace);
 
 	/**
 	 * Returns a flag if pivot selection must be printed while solving.
+     * @return 
 	 */
 	public native boolean isTrace();
 
 	/**
 	 * Sets a flag if Lagrangian progression must be printed while solving.
+     * @param lagTrace
 	 */
 	public native void setLagTrace(boolean lagTrace);
 
 	/**
 	 * Returns a flag if Lagrangian progression must be printed while solving.
+     * @return 
 	 */
 	public native boolean isLagTrace();
 
 	/**
 	 * Specifies which add routine performs best.
+     * @param turnon
+     * @return 
 	 */
 	public native boolean setAddRowmode(boolean turnon);
 
 	/**
 	 * Returns a flag which of the add routines perform best.
+     * @return 
 	 */
 	public native boolean isAddRowmode();
 
 	/**
 	 * Specifies if special handling must be done to reduce degeneracy/cycling while solving.
+     * @param antiDegen
 	 */
 	public native void setAntiDegen(int antiDegen);
 
 	/**
 	 * Returns if the degeneracy rule specified in testmask is active.
+     * @param testmask
+     * @return 
 	 */
 	public native boolean isAntiDegen(int testmask);
 
 	/**
 	 * Returns the used degeneracy rule.
+     * @return 
 	 */
 	public native int getAntiDegen();
 
 	/**
 	 * Specifies if a presolve must be done before solving.
+     * @param doPresolve
+     * @param maxloops
 	 */
 	public native void setPresolve(int doPresolve, int maxloops);
 
 	/**
 	 * Returns if presolve level specified in testmask is active.
+     * @param testmask
+     * @return 
 	 */
 	public native boolean isPresolve(int testmask);
 
 	/**
 	 * Returns the current presolve setting.
+     * @return 
 	 */
 	public native int getPresolve();
 
 	/**
 	 * Returns the number of times presolve is done.
+     * @return 
 	 */
 	public native int getPresolveloops();
 
 	/**
 	 * Sets the maximum number of pivots between a reinversion of the matrix.
+     * @param maxNumInv
 	 */
 	public native void setMaxpivot(int maxNumInv);
 
 	/**
 	 * Returns the maximum number of pivots between a reinversion of the matrix.
+     * @return 
 	 */
 	public native int getMaxpivot();
 
 	/**
 	 * Specifies the branch-and-bound rule.
+     * @param bbRule
 	 */
 	public native void setBbRule(int bbRule);
 
 	/**
 	 * Returns the branch-and-bound rule.
+     * @return 
 	 */
 	public native int getBbRule();
 
 	/**
 	 * Sets the maximum branch-and-bound depth.
+     * @param bbMaxlevel
 	 */
 	public native void setBbDepthlimit(int bbMaxlevel);
 
 	/**
 	 * Returns the maximum branch-and-bound depth.
+     * @return 
 	 */
 	public native int getBbDepthlimit();
 
 	/**
 	 * Returns the number of equal solutions.
+     * @return 
 	 */
 	public native int getSolutioncount();
 
 	/**
 	 * Sets the solution number that must be returned.
+     * @param limit
 	 */
 	public native void setSolutionlimit(int limit);
 
 	/**
 	 * Returns the solution number that must be returned.
+     * @return 
 	 */
 	public native int getSolutionlimit();
 
 	/**
 	 * Set initial "at least better than" guess for objective function.
+     * @param objBound
 	 */
 	public native void setObjBound(double objBound);
 
 	/**
 	 * Returns initial "at least better than" guess for objective function.
+     * @return 
 	 */
 	public native double getObjBound();
 
 	/**
 	 * Specifies which branch to take first in branch-and-bound algorithm.
+     * @param floorFirst
 	 */
 	public native void setBbFloorfirst(int floorFirst);
 
 	/**
 	 * Returns which branch to take first in branch-and-bound algorithm.
+     * @return 
 	 */
 	public native int getBbFloorfirst();
 
 	/**
 	 * Specifies, for the specified variable, which branch to take first
 	 * in branch-and-bound algorithm.
+     * @param colnr
+     * @param branchMode
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setVarBranch(int colnr, int branchMode) throws LpSolveException;
 
 	/**
 	 * Returns, for the specified variable, which branch to take first
 	 * in branch-and-bound algorithm.
+     * @param colnr
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native int getVarBranch(int colnr) throws LpSolveException;
 
 	/**
 	 * Set the weights on variables.
+     * @param weights
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setVarWeights(double[] weights) throws LpSolveException;
 
 	/**
 	 * Returns, for the specified variable, the priority the variable has
 	 * in the branch-and-bound algorithm.
+     * @param colnr
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native int getVarPriority(int colnr) throws LpSolveException;
 
 	/**
 	 * Specifies if the branch-and-bound algorithm stops at first found solution.
+     * @param breakAtFirst
 	 */
 	public native void setBreakAtFirst(boolean breakAtFirst);
 
 	/**
 	 * Returns if the branch-and-bound algorithm stops at first found solution.
+     * @return 
 	 */
 	public native boolean isBreakAtFirst();
 
 	/**
 	 * Specifies if the branch-and-bound algorithm stops when the object value
 	 * is better than a given value.
+     * @param breakAtValue
 	 */
 	public native void setBreakAtValue(double breakAtValue);
 
 	/**
 	 * Returns the value at which the branch-and-bound algorithm stops
 	 * when the object value is better than this value.
+     * @return 
 	 */
 	public native double getBreakAtValue();
 
 	/**
 	 * Specifies which scaling algorithm must be used.
+     * @param scalemode
 	 */
 	public native void setScaling(int scalemode);
 
 	/**
 	 * Specifies which scaling algorithm is used.
+     * @return 
 	 */
 	public native int getScaling();
 
 	/**
 	 * Returns if scaling mode specified in testmask is active.
+     * @param testmask
+     * @return 
 	 */
 	public native boolean isScalemode(int testmask);
 
 	/**
 	 * Returns if scaling type specified in scaletype is active.
+     * @param scaletype
+     * @return 
 	 */
 	public native boolean isScaletype(int scaletype);
 
 	/**
 	 * Specifies which scaling algorithm is used.
+     * @return 
 	 */
 	public native boolean isIntegerscaling();
 
 	/**
 	 * Sets the relative scaling convergence criterion for the active scaling mode;
 	 * the integer part specifies the maximum number of iterations.
+     * @param scalelimit
 	 */
 	public native void setScalelimit(double scalelimit);
 
 	/**
 	 * Returns the relative scaling convergence criterion for the active scaling mode;
 	 * the integer part specifies the maximum number of iterations.
+     * @return 
 	 */
 	public native double getScalelimit();
 
 	/**
 	 * Specifies the iterative improvement level.
+     * @param improve
 	 */
 	public native void setImprove(int improve);
 
 	/**
 	 * Returns the iterative improvement level.
+     * @return 
 	 */
 	public native int getImprove();
 
 	/**
 	 * Specifies the pivot rule.
+     * @param pivRule
 	 */
 	public native void setPivoting(int pivRule);
 
 	/**
 	 * Returns the pivot rule.
+     * @return 
 	 */
 	public native int getPivoting();
 
 	/**
 	 * Returns if pivot strategy specified in testmask is active.
+     * @param testmask
+     * @return 
 	 */
 	public native boolean isPivMode(int testmask);
 
 	/**
 	 * Checks if the specified pivot rule is active.
+     * @param rule
+     * @return 
 	 */
 	public native boolean isPivRule(int rule);
 
 	/**
 	 * Sets the desired combination of primal and dual simplex algorithms.
+     * @param dodual
 	 */
 	public native void setPreferdual(boolean dodual);
 
 	/**
 	 * Sets the desired combination of primal and dual simplex algorithms.
+     * @param simplextype
 	 */
 	public native void setSimplextype(int simplextype);
 
 	/**
 	 * Returns the desired combination of primal and dual simplex algorithms.
+     * @return 
 	 */
 	public native int getSimplextype();
 
 	/**
 	 * Set negative value below which variables are split into a negative
 	 * and a positive part.
+     * @param negRange
 	 */
 	public native void setNegrange(double negRange);
 
 	/**
 	 * Returns the negative value below which variables are split
 	 * into a negative and a positive part.
+     * @return 
 	 */
 	public native double getNegrange();
 
 	/**
 	 * Returns the total number of iterations with Branch-and-bound of the last solution.
+     * @return 
 	 */
 	public native long getTotalIter();
 
 	/**
 	 * Returns the deepest Branch-and-bound level of the last solution.
+     * @return 
 	 */
 	public native int getMaxLevel();
 
 	/**
 	 * Returns the total number of nodes processed in branch-and-bound.
+     * @return 
 	 */
 	public native long getTotalNodes();
 
 	/**
 	 * Returns the number of rows (constraints) in the problem.
+     * @return 
 	 */
 	public native int getNrows();
 
 	/**
 	 * Returns the number of original rows (constraints) in the problem.
+     * @return 
 	 */
 	public native int getNorigRows();
 
 	/**
 	 * Returns the number of Lagrangian rows in the lp.
+     * @return 
 	 */
 	public native int getLrows();
 
 	/**
 	 * Returns the number of columns (variables) in the problem.
+     * @return 
 	 */
 	public native int getNcolumns();
 
 	/**
 	 * Returns the number of original columns (variables) in the problem.
+     * @return 
 	 */
 	public native int getNorigColumns();
 
 	/**
 	 * Returns the number of non-zero elements in the matrix.
+     * @return 
 	 */
 	public native int getNonzeros();
 
 	/**
 	 * Returns the original row/column where a constraint/variable was before presolve.
+     * @param index
+     * @return 
 	 */
 	public native int getOrigIndex(int index);
 
 	/**
 	 * Returns the index in the lp of the original row/column.
+     * @param index
+     * @return 
 	 */
 	public native int getLpIndex(int index);
 
 	/**
 	 * Sets an initial basis of the lp.
+     * @param bascolumn
+     * @param nonbasic
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setBasis(int[] bascolumn, boolean nonbasic) throws LpSolveException;
 
 	/**
 	 * Guess a basis for the lp.
+     * @param guessvector
+     * @param basisvector
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void guessBasis(double[] guessvector, int[] basisvector) throws LpSolveException;
 
 	/**
 	 * Returns the basis of the lp.
+     * @param bascolumn
+     * @param nonbasic
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getBasis(int[] bascolumn, boolean nonbasic) throws LpSolveException;
 
@@ -1235,11 +1585,13 @@ public class LpSolve {
 
 	/**
 	 * Specifies which basis crash mode must be used.
+     * @param mode
 	 */
 	public native void setBasiscrash(int mode);
 
 	/**
 	 * Returns which basis crash mode must be used.
+     * @return 
 	 */
 	public native int getBasiscrash();
 
@@ -1250,22 +1602,28 @@ public class LpSolve {
 
 	/**
 	 * Set basis factorization package.
+     * @param filename
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setBFP(String filename) throws LpSolveException;
 
 	/**
 	 * Returns if the native (build-in) basis factorization package (BFP) is used,
 	 * or an external package.
+     * @return 
 	 */
 	public native boolean isNativeBFP();
 
 	/**
 	 * Returns if there is a basis factorization package (BFP) available.
+     * @return 
 	 */
 	public native boolean hasBFP();
 
 	/**
 	 * Solve the model.
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native int solve() throws LpSolveException;
 
@@ -1281,68 +1639,97 @@ public class LpSolve {
 
 	/**
 	 * Returns the description of a returncode of the solve function.
+     * @param statuscode
+     * @return 
 	 */
 	public native String getStatustext(int statuscode);
 
 	/**
 	 * Checks if provided solution is a feasible solution.
+     * @param values
+     * @param threshold
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native boolean isFeasible(double[] values, double threshold) throws LpSolveException;
 
 	/**
 	 * Returns the value of the objective function.
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native double getObjective() throws LpSolveException;
 
 	/**
 	 * Returns the value of the objective function.
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native double getWorkingObjective() throws LpSolveException;
 
 	/**
 	 * Returns the values of the variables.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param var
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getVariables(double[] var) throws LpSolveException;
 
 	/**
 	 * Returns the values of the variables.
 	 * Returned array is allocated by the method.
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native double[] getPtrVariables() throws LpSolveException;
 
 	/**
 	 * Returns the values of the constraints.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param var
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getConstraints(double[] var) throws LpSolveException;
 
 	/**
 	 * Returns the values of the constraints.
 	 * Returned array is allocated by the method.
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native double[] getPtrConstraints() throws LpSolveException;
 
 	/**
 	 * Returns the solution of the model.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param pv
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getPrimalSolution(double[] pv) throws LpSolveException;
 
 	/**
 	 * Returns the solution of the model.
 	 * Returned array is allocated by the method.
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native double[] getPtrPrimalSolution() throws LpSolveException;
 
 	/**
 	 * Returns the solution of the model.
+     * @param index
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native double getVarPrimalresult(int index) throws LpSolveException;
 
 	/**
 	 * Returns the sensitivity of the constraints and the variables.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param duals
+     * @param dualsfrom
+     * @param dualstill
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getSensitivityRhs(double[] duals, double[] dualsfrom, double[] dualstill) throws LpSolveException;
 
@@ -1352,29 +1739,41 @@ public class LpSolve {
 	 * The returned array contains two elements of type double[].
 	 * element [0] is the duals array, element [1] is the dualsfrom array,
 	 * element [2] is the dualstill array.
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native double[][] getPtrSensitivityRhs() throws LpSolveException;
 
 	/**
 	 * Returns the sensitivity of the constraints and the variables.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param duals
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getDualSolution(double[] duals) throws LpSolveException;
 
 	/**
 	 * Returns the sensitivity of the constraints and the variables.
 	 * Returned array is allocated by the method.
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native double[] getPtrDualSolution() throws LpSolveException;
 
 	/**
 	 * Returns the sensitivity of the constraints and the variables.
+     * @param index
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native double getVarDualresult(int index) throws LpSolveException;
 
 	/**
 	 * Returns the sensitivity of the objective function.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param objfrom
+     * @param objtill
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getSensitivityObj(double[] objfrom, double[] objtill) throws LpSolveException;
 
@@ -1383,12 +1782,19 @@ public class LpSolve {
 	 * Returned arrays are allocated by the method.
 	 * The returned array contains two elements of type double[].
 	 * element [0] is the objfrom array, element [1] is the objtill array.
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native double[][] getPtrSensitivityObj() throws LpSolveException;
 
 	/**
 	 * Returns the sensitivity of the objective function.
 	 * Passed in arrays must be allocated by the caller of the method.
+     * @param objfrom
+     * @param objtill
+     * @param objfromvalue
+     * @param objtillvalue
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getSensitivityObjex(double[] objfrom, double[] objtill,
 		double[] objfromvalue, double[] objtillvalue) throws LpSolveException;
@@ -1399,12 +1805,16 @@ public class LpSolve {
 	 * The returned array contains four elements of type double[].
 	 * element [0] is the objfrom array, element [1] is the objtill array,
 	 * element [2] is the objfromvalue array, element [3] is the objtillvalue array.
+     * @return 
+     * @throws lpsolve.LpSolveException
 	 */
 	public native double[][] getPtrSensitivityObjex() throws LpSolveException;
 
 	/**
 	 * Returns the Lamdba vectors (Lagrangian optimization).
 	 * Passed in array must be allocated by the caller of the method.
+     * @param lambda
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void getLambda(double[] lambda) throws LpSolveException;
 
@@ -1423,37 +1833,54 @@ public class LpSolve {
 
 	/**
 	 * Write an lp model to a file.
+     * @param filename
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void writeLp(String filename) throws LpSolveException;
 
 	/**
 	 * Write an mps model to a file.
+     * @param filename
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void writeMps(String filename) throws LpSolveException;
 
 	/**
 	 * Write a model in free MPS format to a file.
+     * @param filename
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void writeFreeMps(String filename) throws LpSolveException;
 
 	/**
 	 * Read basis from a file and set as default basis. The info text
 	 * is returned as method result.
+     * @param filename
+     * @return 
+     * @throws lpsolve.LpSolveException 
 	 */
 	public native String readBasis(String filename) throws LpSolveException;
 
 	/**
 	 * Writes current basis to a file.
+     * @param filename
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void writeBasis(String filename) throws LpSolveException;
 
 	/**
 	 * Read settings from a parameter file.
+     * @param filename
+     * @param options
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void readParams(String filename, String options) throws LpSolveException;
 
 	/**
 	 * Write settings to a parameter file.
+     * @param filename
+     * @param options
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void writeParams(String filename, String options) throws LpSolveException;
 
@@ -1474,6 +1901,7 @@ public class LpSolve {
 	 * This can only be done after a successful solve.
 	 * This function is meant for debugging purposes. By default, the output is stdout.
 	 * However this can be changed via a call to setOutputfile.
+     * @param columns
 	 */
 	public native void printConstraints(int columns);
 
@@ -1514,73 +1942,103 @@ public class LpSolve {
 	 * This can only be done after a successful solve.
 	 * This function is meant for debugging purposes. By default, the output is stdout.
 	 * However this can be changed via a call to setOutputfile.
+     * @param columns
 	 */
 	public native void printSolution(int columns);
 
 	/**
 	 * Prints a string.
+     * @param str
 	 */
 	public native void printStr(String str);
 
 	/**
 	 * Defines the output for the print_* functions.
+     * @param filename
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setOutputfile(String filename) throws LpSolveException;
 
 	/**
 	 * Do a generic readable data dump of key lp_solve model variables;
 	 * principally for run difference and debugging purposes.
+     * @param filename
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void printDebugdump(String filename) throws LpSolveException;
 
 	/**
 	 * Set External Language Interfaces package.
+     * @param filename
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void setXLI(String filename) throws LpSolveException;
 
 	/**
 	 * Write a model to a file via the External Language Interface.
+     * @param filename
+     * @param options
+     * @param results
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void writeXLI(String filename, String options, boolean results) throws LpSolveException;
 
 	/**
 	 * Returns if there is an external language interface (XLI) set.
+     * @return 
 	 */
 	public native boolean hasXLI();
 
 	/**
 	 * Returns if a build-in External Language Interfaces (XLI) is available or not.
+     * @return 
 	 */
 	public native boolean isNativeXLI();
 
 	/**
 	 * Gets the index of a given column or row name in the lp.
 	 * A return value of -1 indicates that the name does not exist.
+     * @param name
+     * @param isRow
+     * @return 
 	 */
 	public native int getNameindex(String name, boolean isRow);
 
 	/**
 	 * Create the dual of the current model.
+     * @throws lpsolve.LpSolveException
 	 */
 	public native void dualizeLp() throws LpSolveException;
 
 	/**
 	 * Returns if variable or constraint names are used.
+     * @param isRow
+     * @return 
 	 */
 	public native boolean isUseNames(boolean isRow);
 
 	/**
 	 * Sets if variable or constraint names are used.
+     * @param isRow
+     * @param useNames
 	 */
 	public native void setUseNames(boolean isRow, boolean useNames);
 
 	/**
 	 * Gets the value of a constraint according to provided variable values.
+         * @param rownr
+         * @param count
+         * @param primsolution
+         * @param nzindex
+         * @return 
 	 */
 	public native double getConstrValue(int rownr, int count, double[] primsolution, int[] nzindex);
 
 	/**
 	 * This is an internal function that has been published for special purposes. It should generally not be used.
+         * @param basisPos
+         * @param enteringCol
+         * @return 
 	 */
 	public native int setBasisvar(int basisPos, int enteringCol);
 
@@ -1599,6 +2057,7 @@ public class LpSolve {
 	 *
 	 * @param listener the listener that should be called by lp_solve
 	 * @param userhandle an arbitrary object that is passed to the listener on call
+         * @throws lpsolve.LpSolveException
 	 */
 	public void putAbortfunc(AbortListener listener, Object userhandle) throws LpSolveException {
 		abortListener = listener;
@@ -1617,6 +2076,7 @@ public class LpSolve {
 	 *
 	 * @param listener the listener that should be called by lp_solve
 	 * @param userhandle an arbitrary object that is passed to the listener on call
+         * @throws lpsolve.LpSolveException
 	 */
 	public void putLogfunc(LogListener listener, Object userhandle) throws LpSolveException {
 		logListener = listener;
@@ -1635,6 +2095,8 @@ public class LpSolve {
 	 *
 	 * @param listener the listener that should be called by lp_solve
 	 * @param userhandle an arbitrary object that is passed to the listener on call
+         * @param mask
+         * @throws lpsolve.LpSolveException
 	 */
 	public void putMsgfunc(MsgListener listener, Object userhandle, int mask) throws LpSolveException {
 		msgListener = listener;
@@ -1653,6 +2115,7 @@ public class LpSolve {
 	 *
 	 * @param listener the listener that should be called by lp_solve
 	 * @param userhandle an arbitrary object that is passed to the listener on call
+         * @throws lpsolve.LpSolveException
 	 */
 	public void putBbBranchfunc(BbListener listener, Object userhandle) throws LpSolveException {
 		bbBranchListener = listener;
@@ -1671,6 +2134,7 @@ public class LpSolve {
 	 *
 	 * @param listener the listener that should be called by lp_solve
 	 * @param userhandle an arbitrary object that is passed to the listener on call
+         * @throws lpsolve.LpSolveException
 	 */
 	public void putBbNodefunc(BbListener listener, Object userhandle) throws LpSolveException {
 		bbNodeListener = listener;
@@ -1683,7 +2147,7 @@ public class LpSolve {
 	 * Stores references to LpSolve objects. The key to this map
 	 * is the lp_solve lprec pointer value.
 	 */
-	private static Map lpMap = new HashMap();
+	private static final Map lpMap = new HashMap();
 
 	/**
 	 * Adds a LpSolve object to the lpMap
