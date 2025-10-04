@@ -3,7 +3,6 @@
 #################
 
 # Project specific files:
-*.zip
 *.docx
 
 *.pydevproject
