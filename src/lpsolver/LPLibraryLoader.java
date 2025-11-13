@@ -51,6 +51,8 @@ public class LPLibraryLoader {
         // property.  
         // Files.createDirectories does not choke if the directory already 
         // exists, so we don't do that check.
+        // Note that we mark these temp directories and files for deletion
+        // when this session ends.
         Path jTempPath = Paths.get(System.getProperty("java.io.tmpdir"));
         jTempPath = jTempPath.resolve("lpsolver" + LPSolverExtension.LPSVersion);
         jTempPath = Files.createDirectories(jTempPath);

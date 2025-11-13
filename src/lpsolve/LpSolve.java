@@ -18,14 +18,20 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
         Updated for use by version 4.2.0 of the lpsolver extension of 
-        NetLogo 7.0 by Charles Staelin, September 2025.
+        NetLogo 7.0 by Charles Staelin, September/October 2025. In particular,
+        aside from cleaning up javadoc warnings, 
+        1. changed the class to AutoCloseable to substitute for the 
+        depreciated "finalize()" method.
+        2. modernized the code that creates the hashmap that keeps track of 
+        instances of the LpSolve class.
+        3. have LPLibraryLoader.loadit() load the required native libraries.
 */
 
 package lpsolve;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
+// import java.util.Map;
 // import java.util.logging.Level;
 // import java.util.logging.Logger;
 import org.nlogo.api.ExtensionException;
@@ -37,7 +43,7 @@ import org.nlogo.api.ExtensionException;
  *
  * @author Juergen Ebert
  */
-public class LpSolve {
+public class LpSolve implements AutoCloseable {
 
 	public static final int FALSE           = 0;
 	public static final int TRUE            = 1;
@@ -390,15 +396,10 @@ public class LpSolve {
 	 * @see java.lang.Object#finalize()
 	 */
         @Override
-	protected void finalize() throws Throwable {
-            try {
-		if (lp != 0) {
-			removeLp(lp);
-			deleteLp();
-		}
-            }
-            finally {
-		super.finalize();
+	public void close() throws Exception {
+            if (lp != 0) {
+		removeLp(lp);
+		deleteLp();
             }
 	}
 
@@ -2145,9 +2146,9 @@ public class LpSolve {
 
 	/**
 	 * Stores references to LpSolve objects. The key to this map
-	 * is the lp_solve lprec pointer value.
+	 * is the lpsolve.lp pointer (of type long).
 	 */
-	private static final Map lpMap = new HashMap();
+	private static final HashMap<Long, LpSolve> lpMap = new HashMap<>();
 
 	/**
 	 * Adds a LpSolve object to the lpMap

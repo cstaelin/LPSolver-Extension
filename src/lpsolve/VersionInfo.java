@@ -27,13 +27,17 @@ package lpsolve;
  */
 public class VersionInfo {
 	
-	private int _majorversion;
-	private int _minorversion;
-	private int _release;
-	private int _build;
+	private final int _majorversion;
+	private final int _minorversion;
+	private final int _release;
+	private final int _build;
 
 	/**
 	 * Creates a new instance of this class
+     * @param major
+     * @param minor
+     * @param release
+     * @param build
 	 */
 	public VersionInfo(int major, int minor, int release, int build) {
 		_majorversion = major;

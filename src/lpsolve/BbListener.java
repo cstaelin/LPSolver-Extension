@@ -38,7 +38,8 @@ public interface BbListener {
 	 *  
 	 * @param problem the problem this Listener was defined for
 	 * @param userhandle the userhandle object that was passed to <code>putLogfunc</code>
-	 * @param buf the log message
+	 * @param message the log message
+         * @return 
 	 * @throws LpSolveException
 	 */
 	public int bbfunc(LpSolve problem, Object userhandle, int message) throws LpSolveException;
